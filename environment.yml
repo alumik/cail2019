@@ -1,0 +1,9 @@
+name: nlp-cail2019
+dependencies:
+  - python=3.8
+  - cudatoolkit=10.1
+  - cudnn
+  - pip
+  - pip:
+    - tensorflow==2.3.1
+    - git+https://github.com/kyzhouhzau/NLPGNN.git
