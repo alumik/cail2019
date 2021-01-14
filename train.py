@@ -19,7 +19,7 @@ loaded_params.label_size = 2
 
 # Make input files.
 text_tuples = extract_text_tuples('data/train.json')
-make_input_file(text_tuples, path='Input/train', max_len=loaded_params.maxlen)
+make_input_file(text_tuples, path='Input/train', max_len=loaded_params.maxlen, mode='train')
 
 model = BERTClassifier(loaded_params)
 model.build(input_shape=(3, loaded_params.batch_size, loaded_params.maxlen))
