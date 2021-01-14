@@ -53,7 +53,7 @@ for X, token_type_id, input_mask, Y in loader.load_train():
     train_loss, train_predict = train([X, token_type_id, input_mask])
     accuracy = (np.asarray(Y) == np.asarray(np.round(train_predict))).mean()
     if batch_idx % 101 == 0:
-        print(f'Batch {batch_idx}: loss: {train_loss.numpy():.4f} acc: {accuracy}')
+        print(f'Batch {batch_idx}: loss: {train_loss.numpy():.4f} acc: {accuracy:.4f}')
     if batch_idx % 10 == 0:
         manager.save(checkpoint_number=batch_idx)
     with summary_writer.as_default():

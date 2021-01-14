@@ -44,4 +44,4 @@ for X, token_type_id, input_mask, Y in loader.load_valid():
     predict = test([X, token_type_id, input_mask])
     accuracy_list.append((np.asarray(Y) == np.asarray(np.round(predict))).mean())
 
-print(f'Accuracy: {np.mean(accuracy_list)}')
+print(f'Accuracy: {np.mean(accuracy_list):.4f}')
