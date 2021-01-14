@@ -31,7 +31,6 @@ bert_init_weights_from_checkpoint(model, model_path, loaded_params.num_hidden_la
 
 writer = TFWriter(loaded_params.maxlen, vocab_file, modes=['train'], task='cls', check_exist=True)
 loader = TFLoader(loaded_params.maxlen, loaded_params.batch_size, task='cls', epoch=2)
-summary_writer = tf.summary.create_file_writer('tensorboard')
 
 # Save the trained model.
 checkpoint = tf.train.Checkpoint(model=model)
@@ -49,14 +48,14 @@ def train(inputs):
 
 
 batch_idx = 0
+accuracy_list = []
+
 for X, token_type_id, input_mask, Y in loader.load_train():
     train_loss, train_predict = train([X, token_type_id, input_mask])
-    accuracy = (np.asarray(Y) == np.asarray(np.round(train_predict))).mean()
+    accuracy_list.append((np.asarray(Y) == np.asarray(np.round(train_predict))).mean())
     if batch_idx % 101 == 0:
-        print(f'Batch {batch_idx}: loss: {train_loss.numpy():.4f} acc: {accuracy:.4f}')
+        print(f'Batch {batch_idx}: loss: {train_loss.numpy():.4f} acc: {np.mean(accuracy_list):.4f}')
+        accuracy_list = []
     if batch_idx % 10 == 0:
         manager.save(checkpoint_number=batch_idx)
-    with summary_writer.as_default():
-        tf.summary.scalar('loss', train_loss, step=batch_idx)
-        tf.summary.scalar('acc', accuracy, step=batch_idx)
     batch_idx += 1
