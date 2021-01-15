@@ -123,6 +123,13 @@ class TFWriter(object):
                 tokens.append(word)
                 segment_ids.append(0)
                 input_mask.append(1)
+        for index, item in enumerate(tokens):
+            if item == '[' and tokens[index + 1] == 'sep' and tokens[index + 2] == ']':
+                tokens[index] = '[SEP]'
+                del tokens[index + 1:index + 3]
+                del segment_ids[index + 1:index + 3]
+                del input_mask[index + 1:index + 3]
+                break
         tokens.append("[SEP]")
         segment_ids.append(0)
         input_mask.append(1)
@@ -208,11 +215,12 @@ class TFLoader(object):
         example = tf.io.parse_single_example(record, feature_description)
         return example["input_ids"], example["segment_ids"], example["input_mask"], example["label_id"]
 
-    def load_train(self):
+    def load_train(self, shuffle=True):
         self.filename = os.path.join("Input", "train.tfrecords")
         raw_dataset = tf.data.TFRecordDataset(self.filename)
         dataset = raw_dataset.map(map_func=lambda record: self.decode_record(record))
-        dataset = dataset.shuffle(1000)
+        if shuffle:
+            dataset = dataset.shuffle(1000)
         dataset = dataset.repeat(self.epoch)
 
         dataset = dataset.batch(batch_size=self.batch_size,
