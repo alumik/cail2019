@@ -1,4 +1,4 @@
-name: nlp-cail2019
+name: cail2019
 dependencies:
   - python=3.8
   - cudatoolkit=10.1
