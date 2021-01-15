@@ -3,3 +3,4 @@ chinese*
 Input/
 tensorboard/
 save/
+__pycache__/
