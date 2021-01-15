@@ -46,9 +46,10 @@ for X, token_type_id, input_mask, Y in loader.load_valid():
     X1, X2 = X[::2], X[1::2]
     token_type_id_1, token_type_id_2 = token_type_id[::2], token_type_id[1::2]
     input_mask_1, input_mask_2 = input_mask[::2], input_mask[1::2]
+    Y = Y[::2]
     predict = test([[X1, token_type_id_1, input_mask_1], [X2, token_type_id_2, input_mask_2]]).numpy()
 
     # Calculate accuracy for the original problem.
-    accuracy_list.append((np.round(predict) == 1).mean())
+    accuracy_list.append(np.asarray((np.round(predict) == np.asarray(Y))).mean())
 
 print(f'Accuracy: {np.mean(accuracy_list):.4f}')

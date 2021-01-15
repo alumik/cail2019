@@ -44,12 +44,12 @@ manager = tf.train.CheckpointManager(checkpoint, directory='save', checkpoint_na
 
 
 @tf.function
-def train(inputs):
+def train(inputs, y):
     """Train the BERT model."""
 
     with tf.GradientTape() as tape:
         predict = model(inputs)
-        loss = binary_cross_entropy_loss(tf.ones(params.batch_size), predict)
+        loss = binary_cross_entropy_loss(y, predict)
     grads = tape.gradient(loss, model.trainable_weights)
     optimizer.apply_gradients(zip(grads, model.trainable_weights))
     return loss, predict
@@ -58,14 +58,15 @@ def train(inputs):
 batch_idx = 0
 accuracy_list = []
 
-for X, token_type_id, input_mask, _ in loader.load_train(shuffle=False):
+for X, token_type_id, input_mask, Y in loader.load_train(shuffle=False):
     X1, X2 = X[::2], X[1::2]
     token_type_id_1, token_type_id_2 = token_type_id[::2], token_type_id[1::2]
     input_mask_1, input_mask_2 = input_mask[::2], input_mask[1::2]
-    train_loss, train_predict = train([[X1, token_type_id_1, input_mask_1], [X2, token_type_id_2, input_mask_2]])
+    Y = Y[::2]
+    train_loss, train_predict = train([[X1, token_type_id_1, input_mask_1], [X2, token_type_id_2, input_mask_2]], Y)
 
     # Calculate accuracy for the binary classification problem.
-    accuracy_list.append((np.round(train_predict) == 1).mean())
+    accuracy_list.append(np.asarray(np.round(train_predict) == np.asarray(Y)).mean())
 
     # Output the progress every 100 batches.
     if batch_idx % 100 == 0:

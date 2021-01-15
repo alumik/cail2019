@@ -1,5 +1,6 @@
 import os
 import json
+import random
 
 from typing import Sequence
 
@@ -40,8 +41,12 @@ def make_input_file(text_tuples: Sequence, path: str, max_len: int, mode: str):
             # We separate each character with spaces.
             line_ab = ' '.join(tokens_a) + ' [SEP] ' + ' '.join(tokens_b) + '\t1'
             line_ac = ' '.join(tokens_a) + ' [SEP] ' + ' '.join(tokens_c) + '\t0'
-            outfile.write(line_ab + '\n')
-            outfile.write(line_ac + '\n')
+            if bool(random.getrandbits(1)):
+                outfile.write(line_ab + '\n')
+                outfile.write(line_ac + '\n')
+            else:
+                outfile.write(line_ac + '\n')
+                outfile.write(line_ab + '\n')
 
             # Augment the training dataset.
             # If C(A,B)=1, C(A,C)=0, then C(B,A)=1, C(B,C)=0, C(C,C)=1, C(C,B)=0.
@@ -50,7 +55,15 @@ def make_input_file(text_tuples: Sequence, path: str, max_len: int, mode: str):
                 line_bc = ' '.join(tokens_b) + ' [SEP] ' + ' '.join(tokens_c) + '\t0'
                 line_cc = ' '.join(tokens_c) + ' [SEP] ' + ' '.join(tokens_c) + '\t1'
                 line_cb = ' '.join(tokens_c) + ' [SEP] ' + ' '.join(tokens_b) + '\t0'
-                outfile.write(line_ba + '\n')
-                outfile.write(line_bc + '\n')
-                outfile.write(line_cc + '\n')
-                outfile.write(line_cb + '\n')
+                if bool(random.getrandbits(1)):
+                    outfile.write(line_ba + '\n')
+                    outfile.write(line_bc + '\n')
+                else:
+                    outfile.write(line_bc + '\n')
+                    outfile.write(line_ba + '\n')
+                if bool(random.getrandbits(1)):
+                    outfile.write(line_cc + '\n')
+                    outfile.write(line_cb + '\n')
+                else:
+                    outfile.write(line_cb + '\n')
+                    outfile.write(line_cc + '\n')
