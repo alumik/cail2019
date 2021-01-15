@@ -44,13 +44,13 @@ def make_input_file(text_tuples: Sequence, path: str, max_len: int, mode: str):
             outfile.write(line_ac + '\n')
 
             # Augment the training dataset.
-            # If C(A,B)=1, C(A,C)=0, then C(B,A)=1, C(C,A)=0, C(C,A)=0, C(B,C)=0, C(C,B)=0.
+            # If C(A,B)=1, C(A,C)=0, then C(B,A)=1, C(B,C)=0, C(C,C)=1, C(C,B)=0.
             if mode == 'train':
                 line_ba = ' '.join(tokens_b) + ' [SEP] ' + ' '.join(tokens_a) + '\t1'
-                line_ca = ' '.join(tokens_c) + ' [SEP] ' + ' '.join(tokens_a) + '\t0'
                 line_bc = ' '.join(tokens_b) + ' [SEP] ' + ' '.join(tokens_c) + '\t0'
-                line_cb = ' '.join(tokens_b) + ' [SEP] ' + ' '.join(tokens_c) + '\t0'
+                line_cc = ' '.join(tokens_c) + ' [SEP] ' + ' '.join(tokens_c) + '\t1'
+                line_cb = ' '.join(tokens_c) + ' [SEP] ' + ' '.join(tokens_b) + '\t0'
                 outfile.write(line_ba + '\n')
-                outfile.write(line_ca + '\n')
                 outfile.write(line_bc + '\n')
+                outfile.write(line_cc + '\n')
                 outfile.write(line_cb + '\n')
