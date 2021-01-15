@@ -1,18 +1,8 @@
 import os
-import re
 import json
 import random
 
 from typing import Sequence
-
-
-def seg_char(sent):
-    """Split Chinese character without breaking number and English words."""
-
-    pattern = re.compile(r'([\u4e00-\u9fa5])')
-    chars = pattern.split(sent)
-    chars = [w for w in chars if len(w.strip()) > 0]
-    return chars
 
 
 def extract_text_tuples(path: str) -> Sequence:
@@ -23,9 +13,9 @@ def extract_text_tuples(path: str) -> Sequence:
         for line in infile:
             line = line.strip()
             items = json.loads(line)
-            a = seg_char(items['A'].replace('\n', ''))
-            b = seg_char(items['B'].replace('\n', ''))
-            c = seg_char(items['C'].replace('\n', ''))
+            a = items['A'].replace('\n', '')
+            b = items['B'].replace('\n', '')
+            c = items['C'].replace('\n', '')
 
             # `label` is the one more similar to A. We swap B and C if C is more like A.
             if items['label'] == 'C':
@@ -48,9 +38,8 @@ def make_input_file(text_tuples: Sequence, path: str, max_len: int, mode: str):
             tokens_c = c[-(max_len - max_len // 2):]
 
             # Concatenate two pieces with `[SEP]` and attach the label at the end.
-            # We separate each character with spaces.
-            line_ab = ' '.join(tokens_a) + ' [SEP] ' + ' '.join(tokens_b) + '\t1'
-            line_ac = ' '.join(tokens_a) + ' [SEP] ' + ' '.join(tokens_c) + '\t0'
+            line_ab = tokens_a + '[SEP]' + tokens_b + '\t1'
+            line_ac = tokens_a + '[SEP]' + tokens_c + '\t0'
             if bool(random.getrandbits(1)):
                 outfile.write(line_ab + '\n')
                 outfile.write(line_ac + '\n')
@@ -61,10 +50,10 @@ def make_input_file(text_tuples: Sequence, path: str, max_len: int, mode: str):
             # Augment the training dataset.
             # If C(A,B)=1, C(A,C)=0, then C(B,A)=1, C(B,C)=0, C(C,C)=1, C(C,B)=0.
             if mode == 'train':
-                line_ba = ' '.join(tokens_b) + ' [SEP] ' + ' '.join(tokens_a) + '\t1'
-                line_bc = ' '.join(tokens_b) + ' [SEP] ' + ' '.join(tokens_c) + '\t0'
-                line_cc = ' '.join(tokens_c) + ' [SEP] ' + ' '.join(tokens_c) + '\t1'
-                line_cb = ' '.join(tokens_c) + ' [SEP] ' + ' '.join(tokens_b) + '\t0'
+                line_ba = tokens_b + '[SEP]' + tokens_a + '\t1'
+                line_bc = tokens_b + '[SEP]' + tokens_c + '\t0'
+                line_cc = tokens_c + '[SEP]' + tokens_c + '\t1'
+                line_cb = tokens_c + '[SEP]' + tokens_b + '\t0'
                 if bool(random.getrandbits(1)):
                     outfile.write(line_ba + '\n')
                     outfile.write(line_bc + '\n')
