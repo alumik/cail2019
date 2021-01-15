@@ -14,7 +14,7 @@ load_check = LoadCheckpoint()
 params, vocab_file, model_path = load_check.load_bert_param()
 
 # Set some hyper-parameters.
-params.batch_size = 12
+params.batch_size = 6
 params.maxlen = 512  # The max sequence length that BERT can handle is 512.
 params.label_size = 2  # Deteriorate the triplet problem into binary classification.
 
@@ -36,7 +36,7 @@ bert_init_weights_from_checkpoint(model, model_path, params.num_hidden_layers, p
 
 # Transform the input data and build a data loader.
 writer = TFWriter(params.maxlen, vocab_file, modes=['train'], task='cls', check_exist=True)
-loader = TFLoader(params.maxlen, params.batch_size, task='cls', epoch=2)
+loader = TFLoader(params.maxlen, params.batch_size * 2, task='cls', epoch=2)
 
 # Make a checkpoint manager to save the trained model later.
 checkpoint = tf.train.Checkpoint(model=model)
@@ -49,7 +49,7 @@ def train(inputs):
 
     with tf.GradientTape() as tape:
         predict = model(inputs)
-        loss = binary_cross_entropy_loss(tf.ones(params.batch_size / 2), predict)
+        loss = binary_cross_entropy_loss(tf.ones(params.batch_size), predict)
     grads = tape.gradient(loss, model.trainable_weights)
     optimizer.apply_gradients(zip(grads, model.trainable_weights))
     return loss, predict

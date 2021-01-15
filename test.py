@@ -12,7 +12,7 @@ load_check = LoadCheckpoint()
 params, vocab_file, model_path = load_check.load_bert_param()
 
 # Set some hyper-parameters.
-params.batch_size = 12
+params.batch_size = 6
 params.maxlen = 512  # The max sequence length that BERT can handle is 512.
 params.label_size = 2  # Deteriorate the triplet problem into binary classification.
 
@@ -27,7 +27,7 @@ model.summary()
 
 # Transform the input data and build a data loader.
 writer = TFWriter(params.maxlen, vocab_file, modes=['valid'], task='cls', check_exist=True)
-loader = TFLoader(params.maxlen, params.batch_size, task='cls')
+loader = TFLoader(params.maxlen, params.batch_size * 2, task='cls')
 
 # Load the latest checkpoint.
 checkpoint = tf.train.Checkpoint(model=model)
