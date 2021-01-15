@@ -1,8 +1,18 @@
 import os
+import re
 import json
 import random
 
 from typing import Sequence
+
+
+def seg_char(sent):
+    """Split Chinese character without breaking number and English words."""
+
+    pattern = re.compile(r'([\u4e00-\u9fa5])')
+    chars = pattern.split(sent)
+    chars = [w for w in chars if len(w.strip()) > 0]
+    return chars
 
 
 def extract_text_tuples(path: str) -> Sequence:
@@ -13,9 +23,9 @@ def extract_text_tuples(path: str) -> Sequence:
         for line in infile:
             line = line.strip()
             items = json.loads(line)
-            a = list(items['A'].replace('\n', ''))
-            b = list(items['B'].replace('\n', ''))
-            c = list(items['C'].replace('\n', ''))
+            a = seg_char(items['A'].replace('\n', ''))
+            b = seg_char(items['B'].replace('\n', ''))
+            c = seg_char(items['C'].replace('\n', ''))
 
             # `label` is the one more similar to A. We swap B and C if C is more like A.
             if items['label'] == 'C':
