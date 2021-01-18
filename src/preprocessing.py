@@ -17,7 +17,7 @@ def _download_data(path: str, overwrite: bool = False):
         os.remove(downloaded)
 
 
-def _extract_examples(path: str) -> Sequence:
+def _extract_examples(path: str, mode: str) -> Sequence:
     examples = []
     with open(path, 'r', encoding='utf-8') as infile:
         for line in infile:
@@ -26,12 +26,16 @@ def _extract_examples(path: str) -> Sequence:
             a = items.get('A').replace('\n', '')
             b = items.get('B').replace('\n', '')
             c = items.get('C').replace('\n', '')
+            label = 0
 
-            # `label` is the one more similar to A. We swap B and C if C is more like A.
+            # `label` is the one more similar to A. We swap B and C if C is more like A when training.
             if items.get('label') == 'C':
-                b, c = c, b
+                if mode == 'train':
+                    b, c = c, b
+                else:
+                    label = 1
 
-            examples.append((a, b, c, 0))
+            examples.append((a, b, c, label))
     return examples
 
 
@@ -60,7 +64,7 @@ def _encode_examples(examples: Sequence) -> Tuple:
 
 def get_dataset(mode: str, batch_size: int) -> Tuple[tf.data.Dataset, int]:
     _download_data('data')
-    examples = _extract_examples(os.path.join('data', f'{mode}.json'))
+    examples = _extract_examples(os.path.join('data', f'{mode}.json'), mode=mode)
     if mode == 'train':
         examples = _augment_examples(examples)
     ab, ac, labels = _encode_examples(examples)
