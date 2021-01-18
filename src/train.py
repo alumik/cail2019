@@ -12,7 +12,7 @@ MAX_LEN = 512  # The max sequence length that BERT can handle is 512.
 
 # Get the dataset
 print('Preparing dataset...')
-dataset, size = get_dataset(mode='train', batch_size=BATCH_SIZE)
+dataset, n = get_dataset(mode='train', batch_size=BATCH_SIZE)
 
 # Build the BERT model.
 model = Classifier()
@@ -39,12 +39,10 @@ manager = tf.train.CheckpointManager(checkpoint, directory='ckpt', checkpoint_na
 
 
 @tf.function
-def _train(_inputs):
-    _x = _inputs[:-1]
-    _y = _inputs[-1]
+def _train(inputs):
     with tf.GradientTape() as tape:
-        _pred = model(_x)
-        _loss = categorical_cross_entropy_loss(_y, _pred)
+        _pred = model(inputs[:-1])
+        _loss = categorical_cross_entropy_loss(inputs[-1], _pred)
     grads = tape.gradient(_loss, model.trainable_weights)
     optimizer.apply_gradients(zip(grads, model.trainable_weights))
     return _loss, _pred
@@ -52,16 +50,12 @@ def _train(_inputs):
 
 for i in range(EPOCHS):
     print(f'Epoch {i + 1}/{EPOCHS}')
-    batch_idx = 0
-    progbar = tf.keras.utils.Progbar(size, stateful_metrics=['acc'], unit_name='example')
-    for inputs in dataset:
-        y = inputs[-1]
-        loss, pred = _train(inputs)
-        acc = (np.argmax(pred, axis=-1) == np.argmax(y, axis=-1)).mean()
+    progbar = tf.keras.utils.Progbar(n, stateful_metrics=['loss', 'acc'], unit_name='example')
+    for idx, batch in enumerate(dataset):
+        loss, pred = _train(batch)
+        acc = (np.argmax(pred, axis=-1) == np.argmax(batch[-1], axis=-1)).mean()
+        progbar.add(BATCH_SIZE, values=[('loss', loss), ('acc', acc)])
 
         # Save a checkpoint every 10 batches.
-        if batch_idx % 10 == 0:
-            manager.save(checkpoint_number=batch_idx)
-
-        batch_idx += 1
-        progbar.add(BATCH_SIZE, values=[('acc', acc)])
+        if idx % 10 == 0:
+            manager.save(checkpoint_number=idx)

@@ -10,7 +10,7 @@ MAX_LEN = 512  # The max sequence length that BERT can handle is 512.
 
 # Get the dataset
 print('Preparing dataset...')
-dataset, size = get_dataset(mode='test', batch_size=BATCH_SIZE)
+dataset, n = get_dataset(mode='test', batch_size=BATCH_SIZE)
 
 # Build the BERT model.
 model = Classifier()
@@ -23,19 +23,16 @@ checkpoint.restore(tf.train.latest_checkpoint('ckpt'))
 
 
 @tf.function
-def _test(_inputs):
-    return model.predict(_inputs)
+def _test(inputs):
+    return model.predict(inputs)
 
 
-batch_idx = 0
 acc_list = []
-progbar = tf.keras.utils.Progbar(size, unit_name='example')
-for inputs in dataset:
-    y = inputs[-1]
-    pred = _test(inputs)
-    acc = (np.argmax(pred, axis=-1) == np.argmax(y, axis=-1)).mean()
+progbar = tf.keras.utils.Progbar(n, unit_name='example')
+for batch in dataset:
+    pred = _test(batch)
+    acc = (np.argmax(pred, axis=-1) == np.argmax(batch[-1], axis=-1)).mean()
     acc_list.append(acc)
-    batch_idx += 1
     progbar.add(BATCH_SIZE, values=[('acc', acc)])
 
 print(f'Accuracy: {np.mean(acc_list):.4f}')

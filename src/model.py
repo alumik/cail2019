@@ -8,23 +8,19 @@ class Classifier(tf.keras.Model):
         super().__init__(**kwargs)
 
         # Create the BERT model.
-        config = transformers.models.bert.BertConfig.from_pretrained('bert-base-chinese',
-                                                                     return_dict=True,
-                                                                     output_attentions=False,
-                                                                     output_hidden_states=False,
-                                                                     use_cache=True)
-        self.bert = transformers.models.bert.TFBertModel.from_pretrained('bert-base-chinese', config=config)
+        config = transformers.AutoConfig.from_pretrained('bert-base-chinese',
+                                                         return_dict=True,
+                                                         output_attentions=False,
+                                                         output_hidden_states=False,
+                                                         use_cache=True)
+        self.bert = transformers.TFAutoModel.from_pretrained('bert-base-chinese', config=config)
 
-        # Create the subtract layer.
+        # Create the output layers.
         self.subtract = tf.keras.layers.Subtract()
-
-        # Create output layers.
         self.dropout = tf.keras.layers.Dropout(self.bert.config.hidden_dropout_prob)
         self.dense = tf.keras.layers.Dense(2, activation='softmax')
 
     def call(self, inputs, training=True, **kwargs):
-        """Do forward pass."""
-
         x1 = self.bert(input_ids=inputs[0],
                        token_type_ids=inputs[1],
                        attention_mask=inputs[2],
