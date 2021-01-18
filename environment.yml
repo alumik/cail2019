@@ -5,12 +5,6 @@ dependencies:
   - cudnn
   - pip
   - pip:
-    - typeguard
-    - gensim
-    - tqdm
-    - regex
-    - scikit-learn
-    - sentencepiece
-    - networkx
     - tensorflow==2.3.1
-    - git+https://github.com/kyzhouhzau/NLPGNN.git
+    - transformers
+    - wget

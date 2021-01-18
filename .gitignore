@@ -1,6 +1,5 @@
 .idea/
-chinese*
-Input/
-tensorboard/
-save/
 __pycache__/
+
+data/
+ckpt/
