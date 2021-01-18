@@ -26,14 +26,14 @@ def _extract_examples(path: str, mode: str) -> Sequence:
             a = items.get('A').replace('\n', '')
             b = items.get('B').replace('\n', '')
             c = items.get('C').replace('\n', '')
-            label = 0
+            label = [1, 0]
 
             # `label` is the one more similar to A. We swap B and C if C is more like A when training.
             if items.get('label') == 'C':
                 if mode == 'train':
                     b, c = c, b
                 else:
-                    label = 1
+                    label = [0, 1]
 
             examples.append((a, b, c, label))
     return examples
@@ -42,11 +42,11 @@ def _extract_examples(path: str, mode: str) -> Sequence:
 def _augment_examples(examples: Sequence) -> Sequence:
     augmented = []
     for a, b, c, label in examples:
-        augmented.append((a, c, b, 1))
-        augmented.append((b, a, c, 0))
-        augmented.append((b, c, a, 1))
-        augmented.append((c, c, a, 0))
-        augmented.append((c, a, c, 1))
+        augmented.append((a, c, b, [0, 1]))
+        augmented.append((b, a, c, [1, 0]))
+        augmented.append((b, c, a, [0, 1]))
+        augmented.append((c, c, a, [1, 0]))
+        augmented.append((c, a, c, [0, 1]))
     return augmented
 
 

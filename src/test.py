@@ -32,8 +32,8 @@ acc_list = []
 progbar = tf.keras.utils.Progbar(size, unit_name='example')
 for inputs in dataset:
     y = inputs[-1]
-    predict = _test(inputs)
-    acc = np.asarray(np.round(predict) == np.asarray(y)).mean()
+    pred = _test(inputs)
+    acc = (np.argmax(pred, axis=-1) == np.argmax(y, axis=-1)).mean()
     acc_list.append(acc)
     batch_idx += 1
     progbar.add(BATCH_SIZE, values=[('acc', acc)])

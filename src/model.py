@@ -18,8 +18,9 @@ class Classifier(tf.keras.Model):
         # Create the subtract layer.
         self.subtract = tf.keras.layers.Subtract()
 
-        # Create the output dense layer.
-        self.dense = tf.keras.layers.Dense(1, activation='tanh')
+        # Create output layers.
+        self.dropout = tf.keras.layers.Dropout(self.bert.config.hidden_dropout_prob)
+        self.dense = tf.keras.layers.Dense(2, activation='softmax')
 
     def call(self, inputs, training=True, **kwargs):
         """Do forward pass."""
@@ -38,6 +39,7 @@ class Classifier(tf.keras.Model):
         x2 = x2.pooler_output
 
         x = self.subtract([x1, x2])
+        x = self.dropout(x, training=training)
         x = self.dense(x)
         return x
 

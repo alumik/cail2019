@@ -31,7 +31,7 @@ warmup_lr_scheduler = transformers.WarmUp(
     warmup_steps=1000
 )
 optimizer = tf.keras.optimizers.Adam(learning_rate=warmup_lr_scheduler, clipnorm=1.0)
-binary_cross_entropy_loss = tf.keras.losses.BinaryCrossentropy()
+categorical_cross_entropy_loss = tf.keras.losses.CategoricalCrossentropy()
 
 # Make a checkpoint manager to save the trained model later.
 checkpoint = tf.train.Checkpoint(model=model)
@@ -43,11 +43,11 @@ def _train(_inputs):
     _x = _inputs[:-1]
     _y = _inputs[-1]
     with tf.GradientTape() as tape:
-        _predict = model(_x)
-        _loss = binary_cross_entropy_loss(_y, _predict)
+        _pred = model(_x)
+        _loss = categorical_cross_entropy_loss(_y, _pred)
     grads = tape.gradient(_loss, model.trainable_weights)
     optimizer.apply_gradients(zip(grads, model.trainable_weights))
-    return _loss, _predict
+    return _loss, _pred
 
 
 for i in range(EPOCHS):
@@ -56,8 +56,8 @@ for i in range(EPOCHS):
     progbar = tf.keras.utils.Progbar(size, stateful_metrics=['acc'], unit_name='example')
     for inputs in dataset:
         y = inputs[-1]
-        loss, predict = _train(inputs)
-        acc = np.asarray(np.round(predict) == np.asarray(y)).mean()
+        loss, pred = _train(inputs)
+        acc = (np.argmax(pred, axis=-1) == np.argmax(y, axis=-1)).mean()
 
         # Save a checkpoint every 10 batches.
         if batch_idx % 10 == 0:
