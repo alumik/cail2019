@@ -7,7 +7,7 @@ from preprocessing import get_dataset
 
 # Set some hyper-parameters.
 EPOCHS = 2
-BATCH_SIZE = 6
+BATCH_SIZE = 12
 MAX_LEN = 512  # The max sequence length that BERT can handle is 512.
 
 # Get the dataset
