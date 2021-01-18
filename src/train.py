@@ -6,6 +6,7 @@ from model import Classifier
 from preprocessing import get_dataset
 
 # Set some hyper-parameters.
+EPOCHS = 2
 BATCH_SIZE = 6
 MAX_LEN = 512  # The max sequence length that BERT can handle is 512.
 
@@ -49,16 +50,18 @@ def _train(_inputs):
     return _loss, _predict
 
 
-batch_idx = 0
-progbar = tf.keras.utils.Progbar(size, stateful_metrics=['acc'], unit_name='example')
-for inputs in dataset:
-    y = inputs[-1]
-    loss, predict = _train(inputs)
-    acc = np.asarray(np.round(predict) == np.asarray(y)).mean()
+for i in range(EPOCHS):
+    print(f'Epoch {i + 1}/{EPOCHS}')
+    batch_idx = 0
+    progbar = tf.keras.utils.Progbar(size, stateful_metrics=['acc'], unit_name='example')
+    for inputs in dataset:
+        y = inputs[-1]
+        loss, predict = _train(inputs)
+        acc = np.asarray(np.round(predict) == np.asarray(y)).mean()
 
-    # Save a checkpoint every 10 batches.
-    if batch_idx % 10 == 0:
-        manager.save(checkpoint_number=batch_idx)
+        # Save a checkpoint every 10 batches.
+        if batch_idx % 10 == 0:
+            manager.save(checkpoint_number=batch_idx)
 
-    batch_idx += 1
-    progbar.add(BATCH_SIZE, values=[('acc', acc)])
+        batch_idx += 1
+        progbar.add(BATCH_SIZE, values=[('acc', acc)])
