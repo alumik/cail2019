@@ -75,4 +75,5 @@ def get_dataset(mode: str, batch_size: int) -> tf.data.Dataset:
         dataset = dataset.shuffle(1000).batch(batch_size, drop_remainder=True)
     else:
         dataset = dataset.batch(batch_size)
+    dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
     return dataset
