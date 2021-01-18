@@ -30,7 +30,7 @@ warmup_lr_scheduler = transformers.WarmUp(
     decay_schedule_fn=decay_lr_scheduler,
     warmup_steps=1000
 )
-optimizer = tf.keras.optimizers.Adam(learning_rate=warmup_lr_scheduler)
+optimizer = tf.keras.optimizers.Adam(learning_rate=warmup_lr_scheduler, clipnorm=1.0)
 binary_cross_entropy_loss = tf.keras.losses.BinaryCrossentropy()
 
 # Make a checkpoint manager to save the trained model later.
