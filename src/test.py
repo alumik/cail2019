@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from model import Classifier
-from preprocessing import get_dataset
+from dataset import get_dataset
 
 # Set some hyper-parameters.
 BATCH_SIZE = 12

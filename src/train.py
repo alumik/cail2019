@@ -3,7 +3,7 @@ import transformers
 import tensorflow as tf
 
 from model import Classifier
-from preprocessing import get_dataset
+from dataset import get_dataset
 
 # Set some hyper-parameters.
 EPOCHS = 2
