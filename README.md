@@ -3,3 +3,9 @@
 Official GitHub repository for CAIL2019: https://github.com/china-ai-law-challenge/CAIL2019.
 
 Dataset : https://cail.oss-cn-qingdao.aliyuncs.com/cail2019/CAIL2019-SCM.zip.
+
+## Note
+
+We have changed the algorithm to siamese BERT network, instead of the naive BERT model in the original paper.
+
+The current average accuracy on the test dataset is 0.6821.
