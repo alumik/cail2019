@@ -11,7 +11,7 @@ MAX_LEN = 512  # The max sequence length that BERT can handle is 512.
 
 # Get the dataset
 print('Preparing dataset...')
-dataset = get_dataset(mode='train', batch_size=BATCH_SIZE)
+dataset, size = get_dataset(mode='train', batch_size=BATCH_SIZE)
 
 # Build the BERT model.
 model = Classifier()
@@ -50,20 +50,15 @@ def _train(_inputs):
 
 
 batch_idx = 0
-accuracy_list = []
-
+progbar = tf.keras.utils.Progbar(size, stateful_metrics=['acc'], unit_name='example')
 for inputs in dataset:
     y = inputs[-1]
     loss, predict = _train(inputs)
-    accuracy_list.append(np.asarray(np.round(predict) == np.asarray(y)).mean())
-
-    # Output the progress every 100 batches.
-    if batch_idx % 100 == 0:
-        print(f'Batch {batch_idx}: loss: {loss.numpy():.4f} acc: {np.mean(accuracy_list):.4f}')
-        accuracy_list = []
+    acc = np.asarray(np.round(predict) == np.asarray(y)).mean()
 
     # Save a checkpoint every 10 batches.
     if batch_idx % 10 == 0:
         manager.save(checkpoint_number=batch_idx)
 
     batch_idx += 1
+    progbar.add(BATCH_SIZE, values=[('acc', acc)])

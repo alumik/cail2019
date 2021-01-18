@@ -58,12 +58,13 @@ def _encode_examples(examples: Sequence) -> Tuple:
     return ab, ac, labels
 
 
-def get_dataset(mode: str, batch_size: int) -> tf.data.Dataset:
+def get_dataset(mode: str, batch_size: int) -> Tuple[tf.data.Dataset, int]:
     _download_data('data')
     examples = _extract_examples(os.path.join('data', f'{mode}.json'))
     if mode == 'train':
         examples = _augment_examples(examples)
     ab, ac, labels = _encode_examples(examples)
+    size = len(labels)
     dataset = tf.data.Dataset.from_tensor_slices((ab.get('input_ids'),
                                                   ab.get('token_type_ids'),
                                                   ab.get('attention_mask'),
@@ -73,7 +74,8 @@ def get_dataset(mode: str, batch_size: int) -> tf.data.Dataset:
                                                   labels))
     if mode == 'train':
         dataset = dataset.shuffle(1000).batch(batch_size, drop_remainder=True)
+        size -= size % batch_size
     else:
         dataset = dataset.batch(batch_size)
     dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
-    return dataset
+    return dataset, size
