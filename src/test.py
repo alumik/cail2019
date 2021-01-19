@@ -29,7 +29,7 @@ def _test_step(inputs):
 
 
 accuracy = tf.keras.metrics.CategoricalAccuracy()
-progbar = tf.keras.utils.Progbar(n, unit_name='example')
+progbar = tf.keras.utils.Progbar(n, stateful_metrics=['acc'], unit_name='example')
 for batch in dataset:
     _test_step(batch)
     progbar.add(BATCH_SIZE, values=[('acc', accuracy.result())])
