@@ -8,4 +8,4 @@ Dataset : https://cail.oss-cn-qingdao.aliyuncs.com/cail2019/CAIL2019-SCM.zip.
 
 We have changed the algorithm to siamese BERT network, instead of the naive BERT model in the original paper.
 
-The current average accuracy on the test dataset is 0.6821.
+Our current accuracy on the test dataset is 0.6901.
