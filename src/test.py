@@ -1,4 +1,3 @@
-import numpy as np
 import tensorflow as tf
 
 from model import Classifier
@@ -23,16 +22,16 @@ checkpoint.restore(tf.train.latest_checkpoint('ckpt'))
 
 
 @tf.function
-def _test(inputs):
-    return model.predict(inputs)
+def _test_step(inputs):
+    x, y = inputs[:-1], inputs[-1]
+    pred = model.predict(x)
+    accuracy.update_state(y, pred)
 
 
-acc_list = []
+accuracy = tf.keras.metrics.CategoricalAccuracy()
 progbar = tf.keras.utils.Progbar(n, unit_name='example')
 for batch in dataset:
-    pred = _test(batch)
-    acc = (np.argmax(pred, axis=-1) == np.argmax(batch[-1], axis=-1)).mean()
-    acc_list.append(acc)
-    progbar.add(BATCH_SIZE, values=[('acc', acc)])
+    _test_step(batch)
+    progbar.add(BATCH_SIZE, values=[('acc', accuracy.result())])
 
-print(f'Accuracy: {np.mean(acc_list):.4f}')
+print(f'Accuracy: {accuracy.result():.4f}')

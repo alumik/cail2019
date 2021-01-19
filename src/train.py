@@ -1,4 +1,3 @@
-import numpy as np
 import transformers
 import tensorflow as tf
 
@@ -6,7 +5,7 @@ from model import Classifier
 from dataset import get_dataset
 
 # Set some hyper-parameters.
-EPOCHS = 2
+EPOCHS = 5
 BATCH_SIZE = 12
 MAX_LEN = 512  # The max sequence length that BERT can handle is 512.
 
@@ -32,6 +31,7 @@ warmup_lr_scheduler = transformers.WarmUp(
 )
 optimizer = tf.keras.optimizers.Adam(learning_rate=warmup_lr_scheduler, clipnorm=1.0)
 categorical_cross_entropy_loss = tf.keras.losses.CategoricalCrossentropy()
+accuracy = tf.keras.metrics.CategoricalAccuracy()
 
 # Make a checkpoint manager to save the trained model later.
 checkpoint = tf.train.Checkpoint(model=model)
@@ -39,22 +39,24 @@ manager = tf.train.CheckpointManager(checkpoint, directory='ckpt', checkpoint_na
 
 
 @tf.function
-def _train(inputs):
+def _train_step(inputs):
+    x, y = inputs[:-1], inputs[-1]
     with tf.GradientTape() as tape:
-        _pred = model(inputs[:-1])
-        _loss = categorical_cross_entropy_loss(inputs[-1], _pred)
+        pred = model(x)
+        _loss = categorical_cross_entropy_loss(y, pred)
     grads = tape.gradient(_loss, model.trainable_weights)
     optimizer.apply_gradients(zip(grads, model.trainable_weights))
-    return _loss, _pred
+    accuracy.update_state(y, pred)
+    return _loss
 
 
 for i in range(EPOCHS):
     print(f'Epoch {i + 1}/{EPOCHS}')
     progbar = tf.keras.utils.Progbar(n, stateful_metrics=['loss', 'acc'], unit_name='example')
     for idx, batch in enumerate(dataset):
-        loss, pred = _train(batch)
-        acc = (np.argmax(pred, axis=-1) == np.argmax(batch[-1], axis=-1)).mean()
-        progbar.add(BATCH_SIZE, values=[('loss', loss), ('acc', acc)])
+        loss = _train_step(batch)
+        progbar.add(BATCH_SIZE, values=[('loss', loss), ('acc', accuracy.result())])
+        accuracy.reset_states()
 
         # Save a checkpoint every 10 batches.
         if idx % 10 == 0:

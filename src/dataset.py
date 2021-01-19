@@ -70,14 +70,11 @@ def get_dataset(mode: str, batch_size: int) -> Tuple[tf.data.Dataset, int]:
     if mode == 'train':
         examples = _augment_examples(examples)
     ab, ac, labels = _encode_examples(examples)
+    encoded = (ab.get('input_ids'), ab.get('token_type_ids'), ab.get('attention_mask'),
+               ac.get('input_ids'), ac.get('token_type_ids'), ac.get('attention_mask'),
+               labels)
+    dataset = tf.data.Dataset.from_tensor_slices(encoded)
     n = len(labels)
-    dataset = tf.data.Dataset.from_tensor_slices((ab.get('input_ids'),
-                                                  ab.get('token_type_ids'),
-                                                  ab.get('attention_mask'),
-                                                  ac.get('input_ids'),
-                                                  ac.get('token_type_ids'),
-                                                  ac.get('attention_mask'),
-                                                  labels))
     if mode == 'train':
         dataset = dataset.shuffle(1000).batch(batch_size, drop_remainder=True)
         n -= n % batch_size
