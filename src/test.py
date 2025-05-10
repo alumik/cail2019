@@ -1,37 +1,31 @@
+import fire
 import tensorflow as tf
 
 from model import Classifier
 from dataset import get_dataset
 
-# Set some hyper-parameters.
-BATCH_SIZE = 12
-MAX_LEN = 512  # The max sequence length that BERT can handle is 512.
 
-# Get the dataset
-print('Preparing dataset...')
-dataset, n = get_dataset(mode='test', batch_size=BATCH_SIZE)
+def main(
+        load_weights: str = 'ckpt/checkpoint_01_740',
+        batch_size: int = 12,
+        max_len: int = 512,
+):
+    # Get the dataset
+    print('Preparing dataset...')
+    dataset = get_dataset(mode='test', batch_size=batch_size)
 
-# Build the BERT model.
-model = Classifier()
-model(tf.zeros((6, BATCH_SIZE, MAX_LEN), dtype=tf.int32))
-model.summary()
+    # Build the BERT model.
+    model = Classifier()
+    model(tf.zeros((6, batch_size, max_len), dtype=tf.int32))
+    model.summary()
 
-# Load the latest checkpoint.
-checkpoint = tf.train.Checkpoint(model=model)
-checkpoint.restore(tf.train.latest_checkpoint('ckpt'))
+    # Load the latest checkpoint.
+    model.load_weights(load_weights)
 
-
-@tf.function
-def _test_step(inputs):
-    x, y = inputs[:-1], inputs[-1]
-    pred = model.predict(x)
-    accuracy.update_state(y, pred)
+    accuracy = tf.keras.metrics.CategoricalAccuracy()
+    model.compile(metrics=[accuracy])
+    model.evaluate(dataset)
 
 
-accuracy = tf.keras.metrics.CategoricalAccuracy()
-progbar = tf.keras.utils.Progbar(n, stateful_metrics=['acc'], unit_name='example')
-for batch in dataset:
-    _test_step(batch)
-    progbar.add(BATCH_SIZE, values=[('acc', accuracy.result())])
-
-print(f'Accuracy: {accuracy.result():.4f}')
+if __name__ == '__main__':
+    fire.Fire(main)
