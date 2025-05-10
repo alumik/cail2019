@@ -1,4 +1,4 @@
-name: bagel
+name: cail2019
 channels:
   - nvidia
 dependencies:
@@ -10,5 +10,6 @@ dependencies:
   - pip:
     - fire
     - tensorflow~=2.19.0
+    - tf-keras~=2.19.0
     - transformers
     - wget
